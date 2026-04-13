@@ -1,10 +1,7 @@
 const express = require("express")
 const router = express.Router()
+const { getUsers } = require("../controllers/userController")
 
-router.get("/", (req, res) => {
-  res.json({
-    message: "Users route working!"
-  })
-})
+router.get("/", getUsers)
 
 module.exports = router
