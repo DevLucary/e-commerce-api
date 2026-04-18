@@ -1,4 +1,6 @@
 const userService = require("../services/userService")
+const z = require("zod")
+const { createUserSchema } = require("../schemas/userSchema")
 
 const getUsers = async (req, res, next) => {
   try {
@@ -10,6 +12,30 @@ const getUsers = async (req, res, next) => {
   }
 }
 
+const createUser = async (req, res, next) => {
+  try {
+    const validatedData = createUserSchema.parse(req.body)
+    
+    const user = await userService.createUser(valitdatedData)
+    
+    res.status(201).json(user)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const formattedError = error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message
+      }))
+      
+      return res.status(400).json({
+        error: "Validation failed",
+        details: formattedError
+      })
+    }
+    next(error)
+  }
+}
+
 module.exports = {
-  getUsers
+  getUsers,
+  createUser
 }
