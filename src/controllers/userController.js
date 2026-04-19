@@ -16,7 +16,7 @@ const createUser = async (req, res, next) => {
   try {
     const validatedData = createUserSchema.parse(req.body)
     
-    const user = await userService.createUser(valitdatedData)
+    const user = await userService.createUser(validatedData)
     
     res.status(201).json(user)
   } catch (error) {

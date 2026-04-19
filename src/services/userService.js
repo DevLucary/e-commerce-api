@@ -21,7 +21,7 @@ const createUser = async (data) => {
   throw error
   }
   
-  const hashedPassword = await bcryptjs.hash(data.password, 10) 
+  const hashedPassword = await bcrypt.hash(data.password, 10) 
   
   const user = await User.create({
     name: data.name,
