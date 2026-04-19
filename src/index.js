@@ -5,9 +5,11 @@ const userRoutes = require("./routes/userRoutes")
 const errorMiddleware = require("./middlewares/errorMiddleware")
 const { sequelize } = require("./config/db")
 const User = require("./models/User")
+const authRoutes = require("./routes/authRoutes")
 
 app.use(express.json())
 app.use("/users", userRoutes)
+app.use("/auth", authRoutes)
 app.use(errorMiddleware)
 
 sequelize.sync().then(() => {
