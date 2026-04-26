@@ -5,6 +5,7 @@ const userRoutes = require("./routes/userRoutes")
 const errorMiddleware = require("./middlewares/errorMiddleware")
 const { sequelize } = require("./config/db")
 const User = require("./models/User")
+const { Product, Category } = require("./models/associations")
 const authRoutes = require("./routes/authRoutes")
 
 app.use(express.json())
@@ -12,7 +13,7 @@ app.use("/users", userRoutes)
 app.use("/auth", authRoutes)
 app.use(errorMiddleware)
 
-sequelize.sync().then(() => {
+sequelize.sync({force: true}).then(() => {
   console.log("Banco pronto para o uso!")
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
