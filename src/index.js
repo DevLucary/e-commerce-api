@@ -13,7 +13,7 @@ app.use("/users", userRoutes)
 app.use("/auth", authRoutes)
 app.use(errorMiddleware)
 
-sequelize.sync({force: true}).then(() => {
+sequelize.sync().then(() => {
   console.log("Banco pronto para o uso!")
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
