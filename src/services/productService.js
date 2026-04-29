@@ -16,14 +16,12 @@ const getProductById = async (id) => {
 }
 
 const createProduct = async (data) => {
-  /*
   const category = await Category.findByPk(data.categoryId) 
   if (!category) {
     const error = new Error("Category not found")
     error.status = 404
     throw error
   }
-  */
   const product = await Product.create( data )
   return product
 }
