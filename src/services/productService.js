@@ -1,12 +1,12 @@
 const { Product, Category } = require('../models/associations')
 
 const getProducts = async () => {
-  const products = await Product.findAll({ include: { model: Category, attributes: ["name", "description"] } })
+  const products = await Product.findAll({ include: { model: Category, attributes: ["name"] } })
   return products
 }
 
 const getProductById = async (id) => {
-  const product = await Product.findByPk(id, { include: { model: Category, attributes: ["name", "description"] } })
+  const product = await Product.findByPk(id, { include: { model: Category, attributes: ["name"] } })
   if (!product) {
     const error = new Error("Product not found")
     error.status = 404
@@ -16,13 +16,15 @@ const getProductById = async (id) => {
 }
 
 const createProduct = async (data) => {
+  /*
   const category = await Category.findByPk(data.categoryId) 
   if (!category) {
     const error = new Error("Category not found")
     error.status = 404
     throw error
   }
-  const product = await Product.create({ ...data, categoryId: category.id })
+  */
+  const product = await Product.create( data )
   return product
 }
 
@@ -33,13 +35,7 @@ const updateProduct = async (id, data) => {
     error.status = 404
     throw error
   }
-  const [ updatedProduct ] = await product.update(data)
-
-  if(updatedProduct === 0) {
-    const error = new Error("Failed to update product")
-    error.status = 500
-    throw error
-  }
+  const updatedProduct = await product.update(data)
 
   return updatedProduct
 }

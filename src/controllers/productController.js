@@ -1,10 +1,10 @@
-const { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('../services/productService');
+const { getProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('../services/productService');
 const { createProductSchema, updateProductSchema } = require('../schemas/productSchema');
 const z = require('zod')
 
-const getProducts = async (req, res, next) => {
+const getAllProducts = async (req, res, next) => {
     try{
-         const products = await getAllProducts()
+         const products = await getProducts()
          res.status(200).json(products)
     }
     catch (error) {
@@ -12,7 +12,7 @@ const getProducts = async (req, res, next) => {
     }
 }
 
-const getProductById = async (req, res, next) => {
+const getProductsById = async (req, res, next) => {
     try{
         const product = await getProductById(req.params.id)
         res.status(200).json(product)
@@ -42,7 +42,7 @@ const createNewProduct = async (req, res, next) => {
     }
 }
 
-const updateProduct = async (req, res, next) => {
+const updateProducts = async (req, res, next) => {
     try {
         const validatedData = updateProductSchema.parse(req.body)
         const updatedProduct = await updateProduct(req.params.id, validatedData)
@@ -62,7 +62,7 @@ const updateProduct = async (req, res, next) => {
     }
 }
 
-const deleteProduct = async (req, res, next) => {
+const deleteProducts = async (req, res, next) => {
     try {
         const message = await deleteProduct(req.params.id)
         res.status(200).json(message)
@@ -72,9 +72,9 @@ const deleteProduct = async (req, res, next) => {
 }
 
 module.exports = {
-    getProducts,
-    getProductById,
+    getAllProducts,
+    getProductsById,
     createNewProduct,
-    updateProduct,
-    deleteProduct
+    updateProducts,
+    deleteProducts
 }

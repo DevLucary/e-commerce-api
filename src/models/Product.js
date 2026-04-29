@@ -18,6 +18,11 @@ const Product = sequelize.define('product', {
   categoryId: {
    type: Sequelize.INTEGER,
    allowNull: false
+  },
+  stock: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    defaultValue: 0
   }
 })
 
