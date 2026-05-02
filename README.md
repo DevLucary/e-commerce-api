@@ -1,4 +1,4 @@
-# E-commerce API
+# E-COMMERCE API
 
 this is a backend API for e-commerce, with the goals learn and improve my code
 
@@ -7,6 +7,7 @@ this is a backend API for e-commerce, with the goals learn and improve my code
 - Register a new user
 - Login to receive a token
 - View users with token
+- User with a shopping cart 
 
 ## Technologies 
 
@@ -21,9 +22,30 @@ this is a backend API for e-commerce, with the goals learn and improve my code
 
 ## Endpoints 
 
-- `GET /users` - list all registered users | token required
+- `GET /users` - get all registered users | token required
 - `POST /users` - register a new account | public
 - `POST /auth/login` - authenticate and return token | public
+
+### Categories
+- `GET /categories` - get all categories | public
+- `GET /categories/:id` - get category by id | public
+- `POST /categories` - create new category | token required
+- `PUT /categories/:id` - update existing category | token required
+- `DELETE /categories/:id` - delete existing category | token required
+
+### Products
+- `GET /products` - get all products | public
+- `GET /products/:id` - get product by id | public
+- `POST /products` - create new product | token required
+- `PUT /products/:id` - update existing product | token required
+- `DELETE /products/:id` - delete existing product | token required
+
+### Cart / Cart Items
+- `GET /cart/items` - get all cart items | token required
+- `GET /cart/items/calculate` - sum of the prices of all products | token required
+- `POST /cart/items` - create new cart item | token required
+- `PUT /cart/items/:productId` - update the product quantity | token required
+- `DELETE /cart/items/:productId` - remove item from cart | token required
 
 ## Usage 
 
@@ -64,8 +86,8 @@ node src/index.js
 - This project is in development
 
 Checklist:
-- [ ] CRUD de produtos e categorias
-- [ ] Carrinho de compras
+- [x] CRUD de produtos e categorias
+- [x] Carrinho de compras
 - [ ] Pedidos
 - [ ] Upload de imagem
 - [ ] Roles (admin/customer)
