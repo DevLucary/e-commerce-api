@@ -96,6 +96,7 @@ const calculateTotal = async (userId) => {
 }
 
 module.exports = {
+    getCart,
     addToCart,
     getCartItems,
     updateCartItem,
