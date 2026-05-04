@@ -92,7 +92,7 @@ const calculateTotal = async (userId) => {
     const cartItems = await getCartItems(userId)
     return cartItems.reduce((total,item) => (
         total + item.quantity * parseFloat(item.price)
-    ), 0)
+    ), 0).toFixed(2)
 }
 
 module.exports = {
