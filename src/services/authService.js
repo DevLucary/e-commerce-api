@@ -23,11 +23,9 @@ const login = async (data) => {
     throw error
   }
   
-  const token = jwt.sign(
-  { id: user.id },
+  const token = jwt.sign({ id: user.id },
   process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-  )
+  { expiresIn: "7d" })
   
   const { password:_, ...rest } = user.toJSON()
   

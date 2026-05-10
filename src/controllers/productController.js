@@ -71,10 +71,26 @@ const deleteProducts = async (req, res, next) => {
     }
 }
 
+const uploadProductImage = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            const error = new Error("Image not sent")
+            error.status = 400
+            throw error
+        }
+        const imagePath = `/images/products/${req.file.filename}`
+        const updatedProduct = await updateProduct(req.params.id, { image: imagePath })
+        res.status(200).json(updatedProduct)
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     getAllProducts,
     getProductsById,
     createNewProduct,
     updateProducts,
-    deleteProducts
+    deleteProducts,
+    uploadProductImage
 }

@@ -12,6 +12,7 @@ const cartRoutes = require('./routes/cartRoutes')
 const orderRoutes = require('./routes/orderRoutes')
 
 app.use(express.json())
+app.use("/images", express.static("images"))
 app.use("/users", userRoutes)
 app.use("/auth", authRoutes)
 app.use("/products", productRoutes)
