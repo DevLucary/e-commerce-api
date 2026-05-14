@@ -3,7 +3,7 @@ const { getCart, calculateTotal } = require('./cartService')
 
 const checkout = async (userId) => {
     const cart = await getCart(userId)
-    const cartItems = await  cart.getCartItems()
+    const cartItems = await  cart.getCartItems({ include: { model: Product }})
 
     if (cartItems.length === 0) {
         const error = new Error('No products to buy')
@@ -29,6 +29,11 @@ const checkout = async (userId) => {
     const orderItems = await OrderItem.bulkCreate(orderItemsData)
 
     for (const item of cartItems) {
+        if (item.quantity > item.product.stock) { 
+        const error = new Error(`Insufficient stock`)
+        error.status = 400    
+        throw error
+     }
         await Product.decrement('stock', {
             by: item.quantity,
             where : { id: item.productId }
