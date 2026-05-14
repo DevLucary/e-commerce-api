@@ -25,8 +25,8 @@ const addToCart = async (userId, productId, quantity) => {
             throw error
         }
         
-        const updatedProduct = await cartItem.update({ quantity, price: product.price})
-        return updatedProduct
+        const updatedProductInCartItem = await cartItem.update({ quantity: quantity + cartItem.quantity, price: product.price})
+        return updatedProductInCartItem
     } else {
         if( product.stock < quantity) {
             const error = new Error('insufficient stock')
