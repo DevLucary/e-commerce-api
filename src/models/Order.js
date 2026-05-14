@@ -1,4 +1,3 @@
-const { toDefaultValue } = require('sequelize/lib/utils')
 const { Sequelize, sequelize } = require('../config/db')
 
 const Order = sequelize.define('orders', {
@@ -9,7 +8,7 @@ const Order = sequelize.define('orders', {
     status: {
         type: Sequelize.STRING,
         allowNull: false,
-        toDefaultValue: 'pending'
+        defaultValue: 'pending'
     },
     total: {
         type: Sequelize.DECIMAL(10, 2),
