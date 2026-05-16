@@ -39,6 +39,7 @@ this is a backend API for e-commerce, with the goals learn and improve my code
 - `POST /products` - create new product | token required
 - `PUT /products/:id` - update existing product | token required
 - `DELETE /products/:id` - delete existing product | token required
+- `PATCH /products/:id/upload` - update image of product | token required
 
 ### Cart / Cart Items
 - `GET /cart/items` - get all cart items | token required
@@ -46,6 +47,9 @@ this is a backend API for e-commerce, with the goals learn and improve my code
 - `POST /cart/items` - create new cart item | token required
 - `PUT /cart/items/:productId` - update the product quantity | token required
 - `DELETE /cart/items/:productId` - remove item from cart | token required
+
+### Order / Order Items
+- `POST /order` - create order of products | token required
 
 ## Usage 
 
@@ -88,11 +92,14 @@ node src/index.js
 Checklist:
 - [x] CRUD de produtos e categorias
 - [x] Carrinho de compras
-- [ ] Pedidos
-- [ ] Upload de imagem
+- [x] Pedidos
+- [x] Upload de imagem
 - [ ] Roles (admin/customer)
 - [ ] Testes automatizados
-- [ ] Deploy
+- [x] Deploy
+
+## Deploy
+- Will come with the documentation in Swagger
 
 ## Author
 
