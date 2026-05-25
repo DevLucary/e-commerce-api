@@ -1,0 +1,128 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-commerce API",
+        "description": "Essa API tem como objetivo simular uma loja de vendas online, criar projeto para portfolio e aprender sobre APIs e Back End",
+        "termsOfService": "https://raw.githubusercontent.com/DevLucary/e-commerce-api/refs/heads/main/LICENSE",
+        "contact": {
+            "email": "lucarydev1@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+           "url": "http://localhost:8089",
+           "description": "API de teste"
+        },
+        {
+            "url": "https://e-commerce-api-production-1902.up.railway.app",
+            "description": "API de produção"
+        }
+    ],
+    "paths": {
+        "/products": {
+            "get": {
+                "summary": "Busca de produtos",
+                "description": "responsável por buscar todos os produtos",
+                "tags": ["Products"],
+                "responses" : {
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Product"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                },
+            "post": {
+                "summary": "Cadastro de produtos",
+                "description": "responsável por criar produtos",
+                "tags": ["Products"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json":{
+                            "schema": {
+                                "$ref": "#/components/schemas/Product"
+                            },
+                            "examples": {
+                                "product": {
+                                    "value": {
+                                        "title": "Mouse USB",
+                                        "description": "Mouse USB RGB",
+                                        "price": 14.99,
+                                        "categoryId": 1,
+                                        "image": "",
+                                        "stock": 50
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                    "description": "Category not found"
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                        "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Product": {
+                "type": "object",
+                "required": [
+                    "title",
+                    "price",
+                    "categoryId",
+                    "stock"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    }, 
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "categoryId": {
+                        "type": "integer"
+                    },
+                    "image": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "stock": {
+                        "type": "integer"
+                    }
+                }                
+            }
+        }
+    }
+}
