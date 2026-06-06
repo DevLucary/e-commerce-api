@@ -1,6 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const app = express()
+const swagger = require("swagger-ui-express")
 const userRoutes = require("./routes/userRoutes")
 const errorMiddleware = require("./middlewares/errorMiddleware")
 const { sequelize } = require("./config/db")
@@ -10,6 +11,7 @@ const productRoutes = require("./routes/productRoutes")
 const categoryRoutes = require("./routes/categoryRoutes")
 const cartRoutes = require('./routes/cartRoutes')
 const orderRoutes = require('./routes/orderRoutes')
+const swaggerDocs = require("./swagger.json")
 
 app.use(express.json())
 app.use("/images", express.static("images"))
@@ -19,6 +21,7 @@ app.use("/products", productRoutes)
 app.use("/categories", categoryRoutes)
 app.use("/cart", cartRoutes)
 app.use('/order', orderRoutes)
+app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocs))
 app.use(errorMiddleware)
 
 sequelize.sync().then(() => {
