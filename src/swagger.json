@@ -666,6 +666,61 @@
                     }
                 }
             }
+        },
+        "/auth/login": {
+            "post": {
+                "summary": "login de usuário",
+                "description": "responsável por logar o usuário",
+                "tags": ["Auth"],
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAuthRequest"
+                            },
+                            "examples": {
+                                "user": {
+                                    "value": {
+                                        "email": "lucarydev1@gmail.com",
+                                        "password": "123456"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -800,6 +855,30 @@
                     },
                     "password": {
                         "type": "string"
+                    }
+                }
+            },
+            "CreateAuthRequest": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AuthResponse": {
+                "type": "object",
+                "required": ["token", "user"],
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
                     }
                 }
             }
