@@ -582,6 +582,90 @@
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "summary": "Busca de usuários",
+                "description": "responsável por buscar usuários",
+                "tags": ["Users"],
+                "responses": {
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Cadastro de usuários",
+                "description": "responsável por criar usuários",
+                "tags": ["Users"],
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserRequest"
+                            },
+                            "examples": {
+                                "user": {
+                                    "value": {
+                                        "name": "lucary",
+                                        "email": "lucarydev1@gmail.com",
+                                        "password": "123456"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -685,6 +769,36 @@
                 "required": ["name"],
                 "properties": {
                     "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserResponse": {
+                "type": "object",
+                "required": ["id" ,"name", "email"],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CreateUserRequest": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
                         "type": "string"
                     }
                 }
