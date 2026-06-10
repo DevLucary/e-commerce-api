@@ -962,6 +962,51 @@
                     }
                 }
             }
+        },
+        "/order": {
+            "post": {
+                "summary": "Finaliza a compra",
+                "description": "responsável por finalizar a compra",
+                "tags": ["Order"],
+                "responses": {
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1162,6 +1207,27 @@
                 "properties": {
                     "quantity": {
                         "type": "integer"
+                    }
+                }
+            },
+            "OrderResponse": {
+                "type": "object",
+                "required": ["userId", "orderId", "total", "products"],
+                "properties": {
+                    "userId": {
+                        "type": "integer"
+                    },
+                    "orderId": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CartItemResponse"
+                        }
                     }
                 }
             }
