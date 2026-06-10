@@ -99,7 +99,11 @@ Checklist:
 - [x] Deploy
 
 ## Deploy
-- Will come with the documentation in Swagger
+
+The API is documented with Swagger. After starting the server, access:
+
+- Local: http://localhost:8089/api-docs
+- Production: https://e-commerce-api-production-1902.up.railway.app/api-docs
 
 ## Author
 
