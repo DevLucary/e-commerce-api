@@ -90,9 +90,10 @@ const removeFromCart = async (userId, productId) => {
 
 const calculateTotal = async (userId) => {
     const cartItems = await getCartItems(userId)
-    return cartItems.reduce((total,item) => (
-        total + item.quantity * parseFloat(item.price)
-    ), 0).toFixed(2)
+    const total = cartItems.reduce((total,item) => (
+        total + item.quantity * Number(item.price)
+    ), 0)
+    return Math.round(total * 100) / 100
 }
 
 module.exports = {
