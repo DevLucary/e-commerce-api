@@ -18,16 +18,25 @@ const checkout = async (userId) => {
         const total = await calculateTotal(userId)
         
         for (const item of cartItems) {
-            if (item.quantity > item.product.stock) { 
-            const error = new Error(`Insufficient stock`)
-            error.status = 400    
-            throw error
-        }
-            await Product.decrement('stock', {
-                by: item.quantity,
-                where : { id: item.productId },
+            const product = await Product.findByPk(item.productId, {
+                lock: true,
                 transaction
             })
+
+            if(!product) {
+                const error = new Error(`Product not found (ID: ${item.productId})`)
+                error.status = 404
+                throw error
+            }
+
+            if (item.quantity > product.stock) { 
+            const error = new Error(`Insufficient stock for product ID ${item.productId}`)
+            error.status = 400    
+            throw error
+            }
+
+           product.stock -= item.quantity
+           await product.save({ transaction })
         }
         
         const order = await Order.create({
