@@ -1,3 +1,4 @@
+const fs = require('fs/promises')
 const { getProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('../services/productService');
 const { createProductSchema, updateProductSchema } = require('../schemas/productSchema');
 const z = require('zod')
@@ -78,10 +79,16 @@ const uploadProductImage = async (req, res, next) => {
             error.status = 400
             throw error
         }
+
+        await getProductById(req.params.id)
+
         const imagePath = `/images/products/${req.file.filename}`
         const updatedProduct = await updateProduct(req.params.id, { image: imagePath })
         res.status(200).json(updatedProduct)
     } catch (error) {
+        if (req.file) {
+            await fs.unlink(req.file.path).catch(() => {})
+        }
         next(error)
     }
 }
