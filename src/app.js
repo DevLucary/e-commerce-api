@@ -1,0 +1,25 @@
+const express = require("express")
+const app = express()
+
+const swagger = require("swagger-ui-express")
+const userRoutes = require("./routes/userRoutes")
+const errorMiddleware = require("./middlewares/errorMiddleware")
+const authRoutes = require("./routes/authRoutes")
+const productRoutes = require("./routes/productRoutes")
+const categoryRoutes = require("./routes/categoryRoutes")
+const cartRoutes = require('./routes/cartRoutes')
+const orderRoutes = require('./routes/orderRoutes')
+const swaggerDocs = require("./swagger.json")
+
+app.use(express.json())
+app.use("/images", express.static("images"))
+app.use("/users", userRoutes)
+app.use("/auth", authRoutes)
+app.use("/products", productRoutes)
+app.use("/categories", categoryRoutes)
+app.use("/cart", cartRoutes)
+app.use('/order', orderRoutes)
+app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocs))
+app.use(errorMiddleware)
+
+module.exports = app
