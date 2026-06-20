@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env DB_DIALECT=sqlite JWT_SECRET=testsecret jest",
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
@@ -22,7 +22,13 @@
     "mysql2": "^3.22.0",
     "nodemon": "^3.1.14",
     "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
     "swagger-ui-express": "^5.0.1",
     "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }

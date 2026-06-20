@@ -3,7 +3,14 @@ const { getCart, calculateTotal } = require('./cartService')
 const { sequelize } = require('../config/db')
 
 const checkout = async (userId) => {
-    const transaction = await sequelize.transaction()
+    let transaction
+    let options
+    if (process.env.DB_DIALECT === "sqlite") {
+        options = {}
+    } else {
+        transaction = await sequelize.transaction()
+        options = { transaction, lock:true }
+    }
 
     try {
         const cart = await getCart(userId)
@@ -18,9 +25,10 @@ const checkout = async (userId) => {
         const total = await calculateTotal(userId)
         
         for (const item of cartItems) {
-            const product = await Product.findByPk(item.productId, {
-                lock: true,
-                transaction
+            let product
+
+            product = await Product.findByPk(item.productId, {
+                ...options
             })
 
             if(!product) {
@@ -36,14 +44,14 @@ const checkout = async (userId) => {
             }
 
            product.stock -= item.quantity
-           await product.save({ transaction })
+           await product.save(options)
         }
         
         const order = await Order.create({
             userId,
             total,
             status: 'pending'
-        }, { transaction })
+        }, options)
 
         const orderItemsData = cartItems.map((item) => ({
             orderId: order.id,
@@ -52,14 +60,16 @@ const checkout = async (userId) => {
             price: item.price
         }))
 
-        const orderItems = await OrderItem.bulkCreate(orderItemsData, { transaction })
+        const orderItems = await OrderItem.bulkCreate(orderItemsData, options)
 
 
-        await CartItem.destroy({ where: {cartId: cart.id}, transaction })
+        await CartItem.destroy({ where: {cartId: cart.id}, ...options })
 
         const itemsWithProduct = await order.getOrderItems({include: { model: Product }})
 
-        await transaction.commit()
+        if (options.transaction) {
+            await transaction.commit()
+        }
         return {
             userId: order.userId,
             orderId: order.id,
@@ -67,7 +77,9 @@ const checkout = async (userId) => {
             products: itemsWithProduct
         }
     } catch (error) {
-        await transaction.rollback()
+        if (options.transaction) {
+            await transaction.rollback()
+        }
         throw error
     }
 }
