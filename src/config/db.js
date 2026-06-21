@@ -5,7 +5,8 @@ let sequelize
 if (process.env.DB_DIALECT === "sqlite") {
   sequelize = new Sequelize({
     dialect: "sqlite",
-    storage: ":memory:"
+    storage: ":memory:",
+    logging: false
   })
 
 } else {
