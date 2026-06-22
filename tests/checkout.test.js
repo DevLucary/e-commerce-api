@@ -2,6 +2,7 @@ const app = require("../src/app")
 const supertest =require("supertest")
 const request = supertest(app)
 const { sequelize } = require("../src/config/db")
+const Product = require("../src/models/Product")
 
 describe("Checkout", () => {
     beforeAll(async () => {
@@ -90,6 +91,38 @@ describe("Checkout", () => {
         expect(response.body).toHaveProperty("orderId")
         expect(response.body).toHaveProperty("total")
         expect(response.body).toHaveProperty("products")
+    })
+
+    it("Deve retornar erro de autenticação quando estiver sem token", async () => {
+        const response = await request.post("/order")
+        
+        expect(response.status).toBe(401)
+    })
+
+    it("Deve retornar erro de dados inválidos quando o carrinho estiver vazio", async () => {
+        const response = await request.post("/order").set('Authorization', 'Bearer ' + token)
+        
+        expect(response.status).toBe(404)
+    })
+    
+    it("Deve adicionar um produto ao carrinho para realizar teste de estoque insuficiente", async () => {
+        const response = await request.post("/cart/items").set('Authorization', 'Bearer ' + token).send({
+            productId: productId,
+            quantity: 5
+        })
+
+        await Product.update({ stock: 2 }, { where: { id: productId } })
+
+        expect(response.status).toBe(201)
+        expect(response.body).toHaveProperty("productId")
+        expect(response.body).toHaveProperty("quantity")
+        expect(response.body).toHaveProperty("price")
+    })
+
+    it("Deve retornar erro quando o estoque estiver insuficiente ao realizar checkout", async () => {
+        const response = await request.post("/order").set('Authorization', 'Bearer ' + token)
+        
+        expect(response.status).toBe(400)
     })
     
 })
