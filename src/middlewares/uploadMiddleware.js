@@ -14,6 +14,6 @@ const upload = multer({ storage, fileFilter: (req,file,cb) => {
         } else {
             cb(new Error('Tipo de arquivo não permitido'))
         }
-}})
+}, limits: { fileSize: 1024 * 1024 * 5 }})
 
 module.exports = upload.single("image")
