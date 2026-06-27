@@ -29,16 +29,6 @@ const createNewProduct = async (req, res, next) => {
         const newProduct = await createProduct(validatedData)
         res.status(201).json(newProduct)
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const formattedError = error.errors.map((err) => ({
-                field: err.path.join("."),
-                message: err.message
-            }))
-            return res.status(400).json({
-                error: "Validation failed",
-                details: formattedError
-            })
-        }
         next(error)
     }
 }
@@ -49,16 +39,6 @@ const updateProducts = async (req, res, next) => {
         const updatedProduct = await updateProduct(req.params.id, validatedData)
         res.status(200).json(updatedProduct)
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const formattedError = error.errors.map((err) => ({
-                field: err.path.join("."),
-                message: err.message
-            }))
-            return res.status(400).json({
-                error: "Validation failed",
-                details: formattedError
-            })
-        }
         next(error)
     }
 }

@@ -8,18 +8,6 @@ const addToCart = async (req, res, next) => {
     const cartItem = await cartService.addToCart(req.userId, validatedData.productId, validatedData.quantity)
     res.status(201).json(cartItem)
  } catch (error) {
-    if (error instanceof z.ZodError) {
-        const formattedError = error.errors.map((err) => ({
-            field: err.path.join('.'),
-            message: err.message
-    }))
-
-    return res.status(400).json({
-        error:"Validation failed",
-        details: formattedError
-    })
-    }
-
     next(error)
  }
 }
@@ -39,18 +27,6 @@ const updateCartItem = async (req, res, next ) => {
         const updatedCartItem = await cartService.updateCartItem(req.userId, req.params.productId, quantity)
         res.status(200).json(updatedCartItem)
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const formattedError = error.errors.map((err) => ({
-                field: err.path.join('.'),
-                message: err.message
-            }))
-
-            return res.status(400).json({
-                error: "Validation failed",
-                details: formattedError
-            })
-        }
-
         next(error)
     }
 }

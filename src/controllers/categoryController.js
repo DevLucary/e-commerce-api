@@ -26,16 +26,6 @@ const createNewCategory = async (req, res, next) => {
         const newCategory = await createCategory(validatedData)
         res.status(201).json(newCategory)
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const formattedError = error.errors.map((err) => ({
-                field: err.path.join("."),
-                message: err.message
-            }))
-            return res.status(400).json({
-                error: "Validation failed",
-                details: formattedError
-            })
-        }
         next(error)
     }
 }
@@ -46,16 +36,6 @@ const updateCategories = async (req, res, next) => {
         const updatedCategory = await updateCategory(req.params.id, validatedData)
         res.status(200).json(updatedCategory)
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const formattedError = error.errors.map((err) => ({
-                field: err.path.join("."),
-                message: err.message
-            }))
-            return res.status(400).json({
-                error: "Validation failed",
-                details: formattedError
-            })
-        }
         next(error)
     }
 }
