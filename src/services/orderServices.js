@@ -2,9 +2,34 @@ const { Order, OrderItem, Product, CartItem } = require('../models/associations'
 const { getCart, calculateTotal } = require('./cartService')
 const { sequelize } = require('../config/db')
 
+const throwNoProductsToBuy = () => {
+    const error = new Error('No products to buy')
+    error.status = 404
+    throw error
+}
+
+const findProductOrFail = async (productId, options) => {
+    const product = await Product.findByPk(productId, options)
+
+    if (!product) {
+        const error = new Error(`Product not found (ID: ${productId})`)
+        error.status = 404
+        throw error
+    }
+
+    return product
+}
+
+const throwInsufficientStock = (productId) => {
+    const error = new Error(`Insufficient stock for product ID ${productId}`)
+    error.status = 400
+    throw error
+}
+
 const checkout = async (userId) => {
     let transaction
     let options
+
     if (process.env.DB_DIALECT === "sqlite") {
         options = {}
     } else {
@@ -14,33 +39,21 @@ const checkout = async (userId) => {
 
     try {
         const cart = await getCart(userId)
-        const cartItems = await cart.getCartItems({ include: { model: Product }})
+        const cartItems = await cart.getCartItems({
+            include: { model: Product }
+        })
 
         if (cartItems.length === 0) {
-            const error = new Error('No products to buy')
-            error.status = 404
-            throw error
+            throwNoProductsToBuy()
         }
 
         const total = await calculateTotal(userId)
         
         for (const item of cartItems) {
-            let product
-
-            product = await Product.findByPk(item.productId, {
-                ...options
-            })
-
-            if(!product) {
-                const error = new Error(`Product not found (ID: ${item.productId})`)
-                error.status = 404
-                throw error
-            }
+            const product = await findProductOrFail(item.productId, options)
 
             if (item.quantity > product.stock) { 
-            const error = new Error(`Insufficient stock for product ID ${item.productId}`)
-            error.status = 400    
-            throw error
+                throwInsufficientStock(item.productId)
             }
 
            product.stock -= item.quantity
@@ -60,7 +73,7 @@ const checkout = async (userId) => {
             price: item.price
         }))
 
-        const orderItems = await OrderItem.bulkCreate(orderItemsData, options)
+        await OrderItem.bulkCreate(orderItemsData, options)
 
 
         await CartItem.destroy({ where: {cartId: cart.id}, ...options })
@@ -70,12 +83,19 @@ const checkout = async (userId) => {
         if (options.transaction) {
             await transaction.commit()
         }
+
+        console.log(order.userId)
+        console.log(order.id)
+        console.log(order.total)
+        console.log(itemsWithProduct)
+
         return {
             userId: order.userId,
             orderId: order.id,
             total: order.total,
             products: itemsWithProduct
         }
+
     } catch (error) {
         if (options.transaction) {
             await transaction.rollback()

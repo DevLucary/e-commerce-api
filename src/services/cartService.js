@@ -1,39 +1,55 @@
 const { Cart, Product } = require('../models/associations')
 
+const findProductOrFail = async (productId) => {
+    const product = await Product.findByPk(productId)
+    if (!product) {
+        const error = new Error('Product not found')
+        error.status = 404
+        throw error
+    }
+    return product
+}
+
+const checkStockOrFail = async (product, quantity) => {
+    if (product.stock < quantity) {
+        const error = new Error('insufficient stock')
+        error.status = 400
+        throw error
+    }
+}
+
+const findCartItemOrFail = async (cart, productId) => {
+    const [cartItem] = await cart.getCartItems({where: {productId}})
+
+    if (!cartItem) {
+        const error = new Error('product not found')
+        error.status = 404
+        throw error
+    }
+
+    return cartItem
+}
 
 const getCart = async (userId) => {
     const [cart] = await Cart.findOrCreate({where: {userId}})
     return cart
 }
 
-
 const addToCart = async (userId, productId, quantity) => {
     const cart = await getCart(userId)
     const [cartItem] = await cart.getCartItems({ where: { productId }})
-    const product = await Product.findByPk(productId)
+    const product = await findProductOrFail(productId)
 
-    if (!product) {
-        const error = new Error('Product not found')
-        error.status = 404
-        throw error
-    }
+        if(cartItem) {
+        const newQuantity = quantity + cartItem.quantity
+            
+        await checkStockOrFail(product, newQuantity)
 
-    if(cartItem) {
-        if (product.stock < cartItem.quantity + quantity) {
-            const error = new Error('insufficient stock')
-            error.status = 400
-            throw error
-        }
-        
-        const updatedProductInCartItem = await cartItem.update({ quantity: quantity + cartItem.quantity, price: product.price})
+        const updatedProductInCartItem = await cartItem.update({ quantity: newQuantity, price: product.price})
         return updatedProductInCartItem
-    } else {
-        if( product.stock < quantity) {
-            const error = new Error('insufficient stock')
-            error.status = 400
-            throw error
-        }
-
+    } else {   
+        await checkStockOrFail(product, quantity)
+        
         const newCartItem = await cart.createCartItem({ productId, quantity, price: product.price })
         return newCartItem
     }
@@ -41,32 +57,18 @@ const addToCart = async (userId, productId, quantity) => {
 
 const getCartItems = async (userId) => {
     const cart = await getCart(userId)
-    const cartItems = await cart.getCartItems({include: { model: Product }})
+    const cartItems = await cart.getCartItems({
+        include : { model: Product }
+    })
     return cartItems
 }
 
 const updateCartItem = async (userId, productId, quantity) => {
     const cart = await getCart(userId)
-    const [cartItem] = await cart.getCartItems({where: {productId}})
-    const product = await Product.findByPk(productId)
+    const cartItem = await findCartItemOrFail(cart, productId)
+    const product = await findProductOrFail(productId)
 
-    if (!cartItem) {
-        const error = new Error('product not found')
-        error.status = 404
-        throw error
-    }
-
-    if (!product) {
-        const error = new Error('product not found')
-        error.status = 404
-        throw error
-    }
-
-    if (product.stock < quantity) {
-        const error = new Error('insufficient stock')
-        error.status = 400
-        throw error
-    }
+    await checkStockOrFail(product, quantity)
 
     const updatedCartItem = await cartItem.update({ quantity, price: product.price})
     return updatedCartItem
@@ -74,13 +76,7 @@ const updateCartItem = async (userId, productId, quantity) => {
 
 const removeFromCart = async (userId, productId) => {
     const cart = await getCart(userId)
-    const [cartItem] = await cart.getCartItems({ where: {productId}})
-
-    if (!cartItem) {
-        const error = new Error('product not found')
-        error.status = 404
-        throw error
-    }
+    const cartItem = await findCartItemOrFail(cart, productId)
 
     await cartItem.destroy()
     return {

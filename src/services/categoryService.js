@@ -1,44 +1,36 @@
 const Category = require('../models/Category')
 
+const findCategoryOrFail = async (id) => {
+  const category = await Category.findByPk(id)
+  if (!category) {
+    const error = new Error("Category not found")
+    error.status = 404
+    throw error
+  }
+  return category
+}
+
 const getCategories = async () => {
-  const categories = await Category.findAll()
-  return categories
+  return Category.findAll()
 }
 
 const getCategoryById = async (id) => {
-  const category = await Category.findByPk(id)
-  if (!category) {
-    const error = new Error("Category not found")
-    error.status = 404
-    throw error
-  }
-  return category
+  return findCategoryOrFail(id)
 }
 
 const createCategory = async (data) => {
-  const category = await Category.create( data )
-  return category
+  return Category.create( data )
 }
 
 const updateCategory = async (id, data) => {
-  const category = await Category.findByPk(id)
-  if (!category) {
-    const error = new Error("Category not found")
-    error.status = 404
-    throw error
-  }
-  const updatedCategory = await category.update(data)
+  const category = await findCategoryOrFail(id)
 
-  return updatedCategory
+  return category.update(data)
+
 }
 
 const deleteCategory = async (id) => {
-  const category = await Category.findByPk(id)
-  if (!category) {
-    const error = new Error("Category not found")
-    error.status = 404
-    throw error
-  }
+  const category = await findCategoryOrFail(id)
   await category.destroy()
 
   return { message: "Category deleted successfully" }

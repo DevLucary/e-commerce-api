@@ -1,11 +1,7 @@
 const { Product, Category } = require('../models/associations')
+const { getCategoryById } = require('./categoryService')
 
-const getProducts = async () => {
-  const products = await Product.findAll({ include: { model: Category, attributes: ["name"] } })
-  return products
-}
-
-const getProductById = async (id) => {
+const findProductOrFail = async (id) => {
   const product = await Product.findByPk(id, { include: { model: Category, attributes: ["name"] } })
   if (!product) {
     const error = new Error("Product not found")
@@ -15,36 +11,29 @@ const getProductById = async (id) => {
   return product
 }
 
+const getProducts = async () => {
+  const products = await Product.findAll({ include: { model: Category, attributes: ["name"] } })
+  return products
+}
+
+const getProductById = async (id) => {
+  return findProductOrFail(id)
+}
+
 const createProduct = async (data) => {
-  const category = await Category.findByPk(data.categoryId) 
-  if (!category) {
-    const error = new Error("Category not found")
-    error.status = 404
-    throw error
-  }
-  const product = await Product.create( data )
-  return product
+  await getCategoryById(data.categoryId)
+
+  return Product.create(data)
 }
 
 const updateProduct = async (id, data) => {
-  const product = await Product.findByPk(id)
-  if (!product) {
-    const error = new Error("Product not found")
-    error.status = 404
-    throw error
-  }
-  const updatedProduct = await product.update(data)
-
-  return updatedProduct
+  const product = await findProductOrFail(id)
+  
+  return product.update(data)
 }
 
 const deleteProduct = async (id) => {
-  const product = await Product.findByPk(id)
-  if (!product) {
-    const error = new Error("Product not found")
-    error.status = 404
-    throw error
-  }
+  const product = await findProductOrFail(id)
   await product.destroy()
 
   return { message: "Product deleted successfully" }

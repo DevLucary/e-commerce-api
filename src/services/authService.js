@@ -2,25 +2,33 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
 const User = require("../models/User")
 
-const login = async (data) => {
-  const { email, password } = data
-  
+const throwInvalidCredentials = () => {
+  const error = new Error("Invalid credentials")
+  error.status = 401
+  throw error
+}
+
+const findUserOrFail = async (email) => {
   const user = await User.findOne({
     where: { email }
   })
   
   if(!user) {
-    const error = new Error("Invalid credentials")
-    error.status = 401
-    throw error
+    throwInvalidCredentials()
   }
+  
+  return user
+}
+
+const login = async (data) => {
+  const { email, password } = data
+  
+  const user = await findUserOrFail(email)
   
   const isPasswordValid = await bcrypt.compare(password, user.password)
   
   if(!isPasswordValid) {
-    const error = new Error("Invalid credentials")
-    error.status = 401
-    throw error
+    throwInvalidCredentials()
   }
   
   const token = jwt.sign({ id: user.id },
