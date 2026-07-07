@@ -1,11 +1,14 @@
 const fs = require('fs/promises')
 const productService = require('../services/productService');
 const { createProductSchema, updateProductSchema } = require('../schemas/productSchema');
-const z = require('zod')
+const { paginationSchema } = require('../schemas/paginationSchema');
 
 const getAllProducts = async (req, res, next) => {
     try{
-         const products = await productService.getProducts()
+        const { page, limit } = paginationSchema.parse(req.query)
+        
+
+         const products = await productService.getProducts(page, limit)
          res.status(200).json(products)
     }
     catch (error) {

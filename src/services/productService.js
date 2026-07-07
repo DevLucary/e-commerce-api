@@ -11,9 +11,22 @@ const findProductOrFail = async (id) => {
   return product
 }
 
-const getProducts = async () => {
-  const products = await Product.findAll({ include: { model: Category, attributes: ["name"] } })
-  return products
+const getProducts = async (page, limit) => {
+  const pageNum = Number(page) || 1
+  const limitNum = Number(limit) || 10
+
+  const offset = (pageNum - 1) * limitNum
+  
+  const products = await Product.findAndCountAll({ include: { model: Category, attributes: ["name"] }, limit: limitNum, offset })
+  return {
+    products: products.rows,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: products.count,
+      totalPages: Math.ceil(products.count / limitNum)
+    }
+  }
 }
 
 const getProductById = async (id) => {
