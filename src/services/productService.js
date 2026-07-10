@@ -12,18 +12,28 @@ const findProductOrFail = async (id) => {
   return product
 }
 
-const getProducts = async (page, limit, category, name, sort, order) => {
+const getProducts = async (page, limit, category, name, sort, order, minPrice, maxPrice) => {
   const where = {}
   if (category) {
     where.categoryId = category
   }
   if (name) {
-    where.name = { [Op.like]: `%${name}%` }
+    where.title = { [Op.like]: `%${name}%` }
   }
 
   const orderBy = []
   if (sort && order) {
     orderBy.push([sort, order])
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.price = {}
+    if (minPrice !== undefined) {
+      where.price[Op.gte] = minPrice
+    }
+    if (maxPrice !== undefined) {
+      where.price[Op.lte] = maxPrice
+    }
   }
 
 
