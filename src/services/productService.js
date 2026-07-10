@@ -1,5 +1,6 @@
 const { Product, Category } = require('../models/associations')
 const { getCategoryById } = require('./categoryService')
+const { Op } = require('sequelize')
 
 const findProductOrFail = async (id) => {
   const product = await Product.findByPk(id, { include: { model: Category, attributes: ["name"] } })
@@ -11,20 +12,35 @@ const findProductOrFail = async (id) => {
   return product
 }
 
-const getProducts = async (page, limit) => {
+const getProducts = async (page, limit, category, name, sort, order) => {
+  const where = {}
+  if (category) {
+    where.categoryId = category
+  }
+  if (name) {
+    where.name = { [Op.like]: `%${name}%` }
+  }
+
+  const orderBy = []
+  if (sort && order) {
+    orderBy.push([sort, order])
+  }
+
+
   const pageNum = Number(page) || 1
   const limitNum = Number(limit) || 10
 
   const offset = (pageNum - 1) * limitNum
+
+  const { rows, count } = await Product.findAndCountAll({ include: { model: Category, attributes: ["name"] }, limit: limitNum, offset, where, order: orderBy })
   
-  const products = await Product.findAndCountAll({ include: { model: Category, attributes: ["name"] }, limit: limitNum, offset })
   return {
-    products: products.rows,
+    products: rows,
     pagination: {
       page: pageNum,
       limit: limitNum,
-      total: products.count,
-      totalPages: Math.ceil(products.count / limitNum)
+      total: count,
+      totalPages: Math.ceil(count / limitNum)
     }
   }
 }

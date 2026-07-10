@@ -5,10 +5,10 @@ const { paginationSchema } = require('../schemas/paginationSchema');
 
 const getAllProducts = async (req, res, next) => {
     try{
-        const { page, limit } = paginationSchema.parse(req.query)
+        const { page, limit, category, name, sort, order } = paginationSchema.parse(req.query)
         
 
-         const products = await productService.getProducts(page, limit)
+         const products = await productService.getProducts(page, limit, category, name, sort, order)
          res.status(200).json(products)
     }
     catch (error) {
