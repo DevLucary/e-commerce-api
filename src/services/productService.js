@@ -12,33 +12,44 @@ const findProductOrFail = async (id) => {
   return product
 }
 
-const getProducts = async (page, limit, category, name, sort, order, minPrice, maxPrice) => {
+const getProducts = async (filters) => {
+  const { page, limit, category, title, sort, order, minPrice, maxPrice } = filters
+
   const where = {}
   if (category) {
     where.categoryId = category
   }
-  if (name) {
-    where.title = { [Op.like]: `%${name}%` }
+
+  if (title) {
+    where.title = { [Op.like]: `%${title}%` }
   }
 
   const orderBy = []
+
   if (sort && order) {
     orderBy.push([sort, order])
+  } 
+
+  if (sort) {
+    orderBy.push([sort, 'ASC'])
   }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
+
     where.price = {}
+
     if (minPrice !== undefined) {
       where.price[Op.gte] = minPrice
     }
+
     if (maxPrice !== undefined) {
       where.price[Op.lte] = maxPrice
     }
   }
 
 
-  const pageNum = Number(page) || 1
-  const limitNum = Number(limit) || 10
+  const pageNum = page || 1
+  const limitNum = limit || 10
 
   const offset = (pageNum - 1) * limitNum
 
