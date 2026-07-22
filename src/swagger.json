@@ -55,6 +55,11 @@
                 "summary": "Cadastro de produtos",
                 "description": "responsável por criar produtos",
                 "tags": ["Products"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -152,6 +157,11 @@
                 "summary": "Atualiza produtos",
                 "description": "responsável por atualizar os produtos",
                 "tags": ["Products"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -229,6 +239,11 @@
                 "summary": "Deleta produto",
                 "description": "Responsável por deletar produtos",
                 "tags": ["Products"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -277,6 +292,11 @@
                 "summary": "atualiza parte do produto",
                 "description": "responsável por atualizar parte do produto",
                 "tags": ["Products"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -371,6 +391,11 @@
                 "summary": "Cadastro de categorias",
                 "description": "responsável por criar categorias",
                 "tags": ["Categories"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -470,6 +495,11 @@
                 "summary": "Atualiza categorias",
                 "description": "responsável por atualizar as categorias",
                 "tags": ["Categories"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                         {
                             "in": "path",
@@ -541,6 +571,11 @@
                 "summary": "Deleta categoria",
                 "description": "Responsável por deletar categorias",
                 "tags": ["Categories"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -588,6 +623,11 @@
                 "summary": "Busca de usuários",
                 "description": "responsável por buscar usuários",
                 "tags": ["Users"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "responses": {
                     "401": {
                         "content": {
@@ -727,6 +767,11 @@
                 "summary":"Busca produtos do carrinho",
                 "description": "responsável por buscar os produtos do carrinho",
                 "tags": ["Cart"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -755,6 +800,11 @@
                 "summary": "Adiciona o produto ao carrinho",
                 "description": "responsável por adicionar o produto ao carrinho",
                 "tags": ["Cart"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -817,6 +867,11 @@
                 "summary": "Calcula o valor total do carrinho",
                 "description": "responsável por calcular o valor total do carrinho",
                 "tags": ["Cart"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "responses": {
                     "401": {
                         "content": {
@@ -850,6 +905,11 @@
                 "summary": "Atualiza produto do carrinho",
                 "description": "responsável por atualizar o produto do carrinho",
                 "tags": ["Cart"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -921,6 +981,11 @@
                 "summary": "Deleta produto do carrinho",
                 "description": "Responsável por deletar produtos do carrinho",
                 "tags": ["Cart"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "parameters": [
                     {
                         "in": "path",
@@ -968,6 +1033,11 @@
                 "summary": "Finaliza a compra",
                 "description": "responsável por finalizar a compra",
                 "tags": ["Order"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "responses": {
                     "401": {
                         "content": {
@@ -1010,6 +1080,13 @@
         }
     },
     "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
         "schemas": {
             "Product": {
                 "type": "object",
