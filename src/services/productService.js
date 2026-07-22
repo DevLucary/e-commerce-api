@@ -26,14 +26,11 @@ const getProducts = async (filters) => {
 
   const orderBy = []
 
-  if (sort && order) {
-    orderBy.push([sort, order])
-  } 
-
   if (sort) {
-    orderBy.push([sort, 'ASC'])
+    const direction = order || 'ASC'
+    orderBy.push([sort, direction])
   }
-
+ 
   if (minPrice !== undefined || maxPrice !== undefined) {
 
     where.price = {}
