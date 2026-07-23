@@ -1,5 +1,5 @@
 const { Order, OrderItem, Product, CartItem } = require('../models/associations')
-const { getCart, calculateTotal } = require('./cartService')
+const { getCart } = require('./cartService')
 const { sequelize } = require('../config/db')
 
 const throwNoProductsToBuy = () => {
@@ -38,16 +38,20 @@ const checkout = async (userId) => {
     }
 
     try {
-        const cart = await getCart(userId)
+        const cart = await getCart(userId, { ...options })
         const cartItems = await cart.getCartItems({
-            include: { model: Product }
+            include: { model: Product },
+            ...options
         })
 
         if (cartItems.length === 0) {
             throwNoProductsToBuy()
         }
 
-        const total = await calculateTotal(userId)
+        const total = Math.round(cartItems.reduce((total,item) => (
+        total + item.quantity * Number(item.price)
+        ), 0) * 100) / 100
+    
         
         for (const item of cartItems) {
             const product = await findProductOrFail(item.productId, options)
@@ -83,11 +87,6 @@ const checkout = async (userId) => {
         if (options.transaction) {
             await transaction.commit()
         }
-
-        console.log(order.userId)
-        console.log(order.id)
-        console.log(order.total)
-        console.log(itemsWithProduct)
 
         return {
             userId: order.userId,

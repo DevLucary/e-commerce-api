@@ -30,8 +30,8 @@ const findCartItemOrFail = async (cart, productId) => {
     return cartItem
 }
 
-const getCart = async (userId) => {
-    const [cart] = await Cart.findOrCreate({where: {userId}})
+const getCart = async (userId, options) => {
+    const [cart] = await Cart.findOrCreate({where: {userId}, ...options})
     return cart
 }
 
