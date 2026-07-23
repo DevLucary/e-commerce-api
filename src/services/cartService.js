@@ -31,8 +31,20 @@ const findCartItemOrFail = async (cart, productId) => {
 }
 
 const getCart = async (userId, options) => {
-    const [cart] = await Cart.findOrCreate({where: {userId}, ...options})
-    return cart
+    let cart = await Cart.findOne({where: {userId}, ...options})
+    if (cart != null) return cart
+
+    try {
+        cart = await Cart.create({userId}, options)
+        return cart
+    } catch (err) {
+        if (err.name === 'SequelizeUniqueConstraintError') {
+            cart = await Cart.findOne({where: {userId}, ...options})
+            return cart
+        }
+
+        throw err
+    }
 }
 
 const addToCart = async (userId, productId, quantity) => {

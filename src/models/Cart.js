@@ -5,6 +5,7 @@ const Cart = sequelize.define('carts', {
     userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        unique: true,
     references: {
             model: User,
             key: 'id'
