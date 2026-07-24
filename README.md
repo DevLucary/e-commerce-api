@@ -1,24 +1,57 @@
 # E-COMMERCE API
 
-this is a backend API for e-commerce, with the goals learn and improve my code
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white) ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?logo=sequelize&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Jest](https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=white) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Deploy](https://img.shields.io/badge/Deploy-Online-0B0D0E?logo=railway&logoColor=white)
+
+This API simulates an e-commerce system. It includes JWT authentication, a checkout with overselling protection using transactions and locks, structured logs with Pino, 91 automated tests with Jest and Supertest, and Swagger documentation available on the Railway deploy.
 
 ## Features 
 
-- Register a new user
-- Login to receive a token
-- View users with token
-- User with a shopping cart 
+**Authentication & Security**
+- JWT login and route protection
+- Rate limiting and security headers (Helmet)
 
-## Technologies 
+**Products & Categories**
+- Full CRUD with image upload
+- Pagination, sorting by price/date, and filtering by category/price range
 
+**Cart & Checkout**
+- Add, update, and remove items
+- Transactional checkout with database locks to prevent overselling
+
+**Quality & DevOps**
+- 91 automated tests (Jest + Supertest)
+- Structured logs with Pino
+- Docker support
+- Swagger documentation
+
+## Technologies
+
+**Backend**
 - Node.js
 - Express
-- bcryptjs
+
+**Database**
 - MySQL2
 - Sequelize
+
+**Authentication & Security**
 - Jsonwebtoken
+- bcryptjs
+- Helmet
+- CORS
+- express-rate-limit
+
+**Validation & Logging**
 - Zod
-- dotenv
+- Pino
+
+**Testing**
+- Jest
+- Supertest
+
+**DevOps & Documentation**
+- Docker
+- Swagger
 
 ## Endpoints 
 
@@ -53,6 +86,7 @@ this is a backend API for e-commerce, with the goals learn and improve my code
 
 ## Usage 
 
+Create user
 ```bash
 Request
 POST /users
@@ -75,28 +109,47 @@ Response
 }
 ```
 
+User Login
+```bash
+Request
+POST /auth/login
+Body: 
+{
+  "email": "lucary@email.com",
+  "password": "123456"
+}
+```
+```bash
+Response
+{
+  "token": "string (JWT)",
+  "user": 
+  {
+    "id": 1,
+    "name": "Lucary",
+    "email": "lucary@email.com",
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+}
+```
+
 ## Running the application
 
-- Configure your environment variables in .env
+- Copy `.env.example` to `.env` and fill in the required environment variables.
 
-```bash 
+```bash
 git clone https://github.com/DevLucary/e-commerce-api
-npm install 
+npm install
 node src/index.js
 ```
 
-## Project status
- 
-- This project is in development
+## Roadmap
 
-Checklist:
-- [x] CRUD de produtos e categorias
-- [x] Carrinho de compras
-- [x] Pedidos
-- [x] Upload de imagem
-- [ ] Roles (admin/customer)
-- [ ] Testes automatizados
-- [x] Deploy
+- [ ] User roles (admin/customer)
+- [ ] Refresh token rotation
+- [ ] CI/CD pipeline
+- [ ] Order history endpoint
 
 ## Deploy
 
@@ -109,6 +162,15 @@ The API is documented with Swagger. After starting the server, access:
 
 ```bash
 docker compose up --build
+```
+
+## Testing
+
+The project includes integration tests using Jest and Supertest with an in-memory SQLite database.
+
+Run all test with:
+```bash
+npm test
 ```
 
 ## Author
