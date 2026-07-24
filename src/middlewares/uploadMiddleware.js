@@ -1,4 +1,7 @@
 const multer = require("multer")
+const fs = require("node:fs")
+
+fs.mkdirSync('./images/products', { recursive: true })
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
