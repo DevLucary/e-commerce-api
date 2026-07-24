@@ -1,4 +1,5 @@
 const { ZodError } = require("zod")
+const logger = require("../config/logger")
 
 const errorMiddleware = (err, req, res, next) => {
   if (err instanceof ZodError) {
@@ -15,8 +16,8 @@ const errorMiddleware = (err, req, res, next) => {
   const status = err.status || 500
   const message = err.message
   
-  console.error(`Erro no servidor: ${message}`)
-  console.error(err.stack)
+  logger.error({err}, 'Erro no servidor:')
+  
   
   res.status(status).json({
     error: true,
