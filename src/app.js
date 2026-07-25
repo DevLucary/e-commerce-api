@@ -12,6 +12,7 @@ const productRoutes = require("./routes/productRoutes")
 const categoryRoutes = require("./routes/categoryRoutes")
 const cartRoutes = require('./routes/cartRoutes')
 const orderRoutes = require('./routes/orderRoutes')
+const adminRoutes = require("./routes/adminRoutes")
 const swaggerDocs = require("./swagger.json")
 
 const limiter = rateLimit({
@@ -30,6 +31,7 @@ app.use("/products", productRoutes)
 app.use("/categories", categoryRoutes)
 app.use("/cart", cartRoutes)
 app.use('/order', orderRoutes)
+app.use("/admin", adminRoutes)
 app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocs))
 app.use(errorMiddleware)
 

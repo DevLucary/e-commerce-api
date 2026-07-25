@@ -2,39 +2,37 @@ const app = require("../src/app")
 const request = require("supertest")(app)
 const { sequelize } = require("../src/config/db")
 const fs = require("fs/promises")
+const bcrypt = require("bcryptjs")
+const User = require("../src/models/User")
 
 describe("Products", () => {
+let adminToken
+
     beforeAll(async () => {
         await sequelize.sync({ force: true })
+
+        const hashedPassword = await bcrypt.hash("123456", 10)
+
+        await User.create({
+            name: "Admin",
+            email: "admin@email.com",
+            password: hashedPassword,
+            role: "admin"
+        })
+
+        const loginResponse = await request.post("/auth/login").send({
+            email: "admin@email.com",
+        password: "123456"
+        })
+
+        adminToken = loginResponse.body.token
     })
 
-    let token
     let categoryId
     let categoryId2
 
-    it("Deve criar o usuário", async () => {
-        const response = await request.post("/users").send({
-            name: "Teste",
-            email: "teste@teste.com",
-            password: "123456"
-        })
-        
-        expect(response.status).toBe(201)
-    })
-
-    it("Deve fazer login", async () => {
-        const response = await request.post("/auth/login").send({
-            email: "teste@teste.com",
-            password: "123456"
-        })
-
-        token = response.body.token
-        
-        expect(response.status).toBe(200)
-    })
-
     it("deve criar uma categoria", async () => {
-        const response = await request.post("/categories").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/categories").set("Authorization", `Bearer ${adminToken}`).send({
             name: "Eletrônicos"
         })
 
@@ -45,7 +43,7 @@ describe("Products", () => {
     })
 
     it("Deve criar outra categoria", async () => {
-        const response = await request.post("/categories").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/categories").set("Authorization", `Bearer ${adminToken}`).send({
             name: "Roupas"
         })
         
@@ -103,7 +101,7 @@ describe("Products", () => {
 
         for (const p of products) {
            const response = await request.post('/products')
-                .set('Authorization', 'Bearer ' + token)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send(p)
 
                 expect(response.status).toBe(201)
@@ -247,7 +245,7 @@ describe("Products", () => {
     })
 
     it("Deve retornar erro de validação quando não fornecer dados válidos", async () => {
-        const response = await request.post("/products").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/products").set("Authorization", `Bearer ${adminToken}`).send({
             title: "",
             price: -100,
             categoryId: -1,
@@ -258,7 +256,7 @@ describe("Products", () => {
     })
 
     it("Deve retornar erro de categoria não encontrada", async () => {
-        const response = await request.post("/products").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/products").set("Authorization", `Bearer ${adminToken}`).send({
             title: "Teste",
             price: 100,
             categoryId: 999,
@@ -281,13 +279,13 @@ describe("Products", () => {
     })
 
     it("Deve atualizar a imagem do produto", async () => {
-        const response = await request.patch("/products/1/upload").set("Authorization", `Bearer ${token}`).attach("image", "test.png")
+        const response = await request.patch("/products/1/upload").set("Authorization", `Bearer ${adminToken}`).attach("image", "test.png")
 
         expect(response.status).toBe(200)
     })
 
     it("Deve retornar erro de validação ao tentar atualizar a imagem de um produto que não existe", async () => {
-        const response = await request.patch("/products/999/upload").set("Authorization", `Bearer ${token}`).attach("image", "test.png")
+        const response = await request.patch("/products/999/upload").set("Authorization", `Bearer ${adminToken}`).attach("image", "test.png")
 
         expect(response.status).toBe(404)
     })
@@ -299,13 +297,13 @@ describe("Products", () => {
     })
 
     it("Deve retornar erro de validação ao tentar atualizar a imagem sem arquivo", async () => {
-        const response = await request.patch("/products/1/upload").set("Authorization", `Bearer ${token}`)
+        const response = await request.patch("/products/1/upload").set("Authorization", `Bearer ${adminToken}`)
 
         expect(response.status).toBe(400)
     })
 
     it("Deve atualizar um produto", async () => {
-        const response = await request.put("/products/1").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.put("/products/1").set("Authorization", `Bearer ${adminToken}`).send({
             title: "Teste Atualizado",
             price: 200,
             categoryId: 1,
@@ -327,13 +325,13 @@ describe("Products", () => {
     })
 
     it("Deve retornar erro de validação ao tentar atualizar um produto sem dados", async () => {
-        const response = await request.put("/products/1").set("Authorization", `Bearer ${token}`)
+        const response = await request.put("/products/1").set("Authorization", `Bearer ${adminToken}`)
 
         expect(response.status).toBe(400)
     }) 
 
     it("Deve retornar erro de validação ao tentar atualizar um produto que não existe", async () => {
-        const response = await request.put("/products/999").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.put("/products/999").set("Authorization", `Bearer ${adminToken}`).send({
             title: "Teste Atualizado",
             price: 200,
             categoryId: 1,
@@ -350,13 +348,13 @@ describe("Products", () => {
     })
 
     it("Deve retornar erro de validação ao tentar deletar um produto que não existe", async () => {
-        const response = await request.delete("/products/999").set("Authorization", `Bearer ${token}`)
+        const response = await request.delete("/products/999").set("Authorization", `Bearer ${adminToken}`)
 
         expect(response.status).toBe(404)
     })
     
     it("Deve deletar um produto", async () => {
-        const response = await request.delete("/products/1").set("Authorization", `Bearer ${token}`)
+        const response = await request.delete("/products/1").set("Authorization", `Bearer ${adminToken}`)
         
         expect(response.status).toBe(200)
     })

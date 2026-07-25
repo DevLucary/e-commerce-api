@@ -1,34 +1,31 @@
 const app = require("../src/app")
 const request = require("supertest")(app)
 const { sequelize } = require("../src/config/db")
+const bcrypt = require("bcryptjs")
+const User = require("../src/models/User")
 
 describe("Categories", () => {
-    beforeAll(async () => {
-        await sequelize.sync({ force: true })
+    let adminToken
+
+   beforeAll(async () => {
+    await sequelize.sync({ force: true })
+
+    const hashedPassword = await bcrypt.hash("123456", 10)
+
+    await User.create({
+      name: "Admin",
+      email: "admin@email.com",
+      password: hashedPassword,
+      role: "admin"
     })
 
-    let token
-
-    it("Deve criar um usuário para testes", async () => {
-        const response = await request.post("/users").send({
-            name: "teste",
-            email: "teste@email.com",
-            password: "123456"
-        })
-
-        expect(response.status).toBe(201)
+    const loginResponse = await request.post("/auth/login").send({
+      email: "admin@email.com",
+      password: "123456",
     })
 
-    it("Deve fazer login com o usuário criado", async () => {
-        const response = await request.post("/auth/login").send({
-            email: "teste@email.com",
-            password: "123456"
-        })
-
-        token = response.body.token
-
-        expect(response.status).toBe(200)
-    })
+    adminToken = loginResponse.body.token
+  })
 
     it("Deve listar todas as categorias", async () => {
         const response = await request.get("/categories")
@@ -37,7 +34,7 @@ describe("Categories", () => {
     })
     
     it("Deve criar uma nova categoria", async () => {
-        const response = await request.post("/categories/").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/categories/").set("Authorization", `Bearer ${adminToken}`).send({
             name: "Teste"
         })
         
@@ -57,7 +54,7 @@ describe("Categories", () => {
     })
 
     it("Deve atualizar uma categoria", async () => {
-        const response = await request.put("/categories/1").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.put("/categories/1").set("Authorization", `Bearer ${adminToken}`).send({
             name: "Teste Atualizado"
         })
 
@@ -73,7 +70,7 @@ describe("Categories", () => {
     })
 
     it("Deve retornar erro de validação ao tentar atualizar uma categoria com dados inválidos", async () => {
-        const response = await request.put("/categories/1").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.put("/categories/1").set("Authorization", `Bearer ${adminToken}`).send({
             name: ""
         })
 
@@ -81,7 +78,7 @@ describe("Categories", () => {
     })
     
     it("Deve retornar erro ao tentar atualizar uma categoria que não existe", async () => {
-        const response = await request.put("/categories/999").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.put("/categories/999").set("Authorization", `Bearer ${adminToken}`).send({
             name: "Teste Atualizado"
         })
 
@@ -90,13 +87,13 @@ describe("Categories", () => {
     
     
     it("Deve retornar erro ao tentar deletar uma categoria que não existe", async () => {
-        const response = await request.delete("/categories/999").set("Authorization", `Bearer ${token}`)
+        const response = await request.delete("/categories/999").set("Authorization", `Bearer ${adminToken}`)
 
         expect(response.status).toBe(404)
     })
 
     it("Deve deletar uma categoria", async () => {
-        const response = await request.delete("/categories/1").set("Authorization", `Bearer ${token}`)
+        const response = await request.delete("/categories/1").set("Authorization", `Bearer ${adminToken}`)
 
         expect(response.status).toBe(200)
     })
@@ -110,7 +107,7 @@ describe("Categories", () => {
     })
 
     it("Deve retornar erro de validação ao tentar criar uma categoria com dados inválidos", async () => {
-        const response = await request.post("/categories/").set("Authorization", `Bearer ${token}`).send({
+        const response = await request.post("/categories/").set("Authorization", `Bearer ${adminToken}`).send({
             name: ""
         })
 
