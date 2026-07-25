@@ -5,6 +5,7 @@ const User = require('./User')
 const CartItem = require('./CartItem')
 const Order = require('./Order')
 const OrderItem = require('./OrderItem')
+const RefreshToken = require("./RefreshToken")
 
 Order.belongsTo(User, {
     foreignKey: 'userId'
@@ -59,6 +60,13 @@ Category.hasMany(Product, {
      foreignKey: 'categoryId' 
     })
 
+RefreshToken.belongsTo(User, { 
+    foreignKey: 'userId' 
+    })
+User.hasMany(RefreshToken, {
+     foreignKey: 'userId' 
+    })
+
 module.exports = {
   Product,
   Category,
@@ -66,6 +74,6 @@ module.exports = {
   User,
   CartItem,
   Order,
-  OrderItem
+  OrderItem,
+  RefreshToken
 }
-

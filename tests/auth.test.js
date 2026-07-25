@@ -46,4 +46,17 @@ describe("Auth", () => {
 
         expect(response.status).toBe(401)
     })
+
+    it("deve fazer login com sucesso e retornar tokens", async () => {
+        const response = await request.post("/auth/login").send({
+            email: "teste@email.com",
+            password: "123456"
+        })
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty("token")
+        expect(response.body).toHaveProperty("user")
+        expect(response.body.user).toHaveProperty("email", "teste@email.com")
+        expect(response.body).toHaveProperty("refreshToken")
+    })
 })

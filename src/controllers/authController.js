@@ -1,6 +1,6 @@
 const z = require("zod")
-const { loginSchema } = require("../schemas/authSchema")
-const { login } = require("../services/authService")
+const { loginSchema, refreshSchema } = require("../schemas/authSchema")
+const { login, refresh } = require("../services/authService")
 
 const loginUser = async (req, res, next ) => {
   try {
@@ -14,6 +14,19 @@ const loginUser = async (req, res, next ) => {
   }
 }
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const validatedData = refreshSchema.parse(req.body)
+
+    const refreshResult = await refresh(validatedData.refreshToken)
+
+    res.status(200).json(refreshResult)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
-  loginUser
+  loginUser,
+  refreshToken
 }
