@@ -73,7 +73,7 @@ const refresh = async (refreshToken) => {
     throw error
   }
 
-  if (token.expiresAt < new Date()) {
+  if (new Date(token.expiresAt) < new Date()) {
     await token.destroy()
 
     const error = new Error("Refresh token expired")
