@@ -9,6 +9,17 @@ const checkout = async (req, res, next) => {
     }
 }
 
+const getOrderByUser = async (req, res, next) => {
+    try {
+        const result = await orderService.getOrderByUser(req.userId)
+        
+        res.status(200).json(result)
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
-    checkout
+    checkout,
+    getOrderByUser
 }

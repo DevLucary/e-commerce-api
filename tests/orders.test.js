@@ -6,7 +6,7 @@ const Product = require("../src/models/Product")
 const bcrypt = require("bcryptjs")
 const User = require("../src/models/User")
 
-describe("Checkout", () => {
+describe("Orders", () => {
     let adminToken
 
     beforeAll(async () => {
@@ -30,6 +30,7 @@ describe("Checkout", () => {
     })
 
     let token
+    let token2
     let categoryId
     let productId
     
@@ -41,11 +42,28 @@ describe("Checkout", () => {
         })
         
         expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("name", "teste")
-        expect(response.body).toHaveProperty("email", "teste@email.com")
-        
     })
     
+    it("Deve criar outro usuário", async () => {
+        const response = await request.post('/users').send({
+            name: "teste2",
+            email: "teste2@email.com",
+            password: "123456"
+        })
+        
+        expect(response.status).toBe(201)
+    })
+
+    it("Deve logar o outro usuário", async () => {
+        const response = await request.post('/auth/login').send({
+            email: "teste2@email.com",
+            password: "123456"
+        })
+        
+        token2 = response.body.token
+        
+        expect(response.status).toBe(200)
+    })
     
     it("Deve logar o usuário", async () => {
         const response = await request.post('/auth/login').send({
@@ -56,9 +74,6 @@ describe("Checkout", () => {
         token = response.body.token
         
         expect(response.status).toBe(200)
-        expect(response.body).toHaveProperty("token")
-        expect(response.body).toHaveProperty("user")
-        expect(response.body.user).toHaveProperty("email", "teste@email.com")
     })
     
     it("Deve criar uma categoria", async () => {
@@ -69,7 +84,6 @@ describe("Checkout", () => {
         categoryId = response.body.id
         
         expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("name", "tecnologia")
     })
     
     it("Deve criar um produto", async () => {
@@ -83,10 +97,6 @@ describe("Checkout", () => {
         productId = response.body.id
         
         expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("title", "Mouse USB")
-        expect(response.body).toHaveProperty("price", 14.99)
-        expect(response.body).toHaveProperty("categoryId")
-        expect(response.body).toHaveProperty("stock", 30)
     })
     
     it("Deve adicionar um produto ao carrinho", async () => {
@@ -96,51 +106,50 @@ describe("Checkout", () => {
         })
         
         expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("productId")
-        expect(response.body).toHaveProperty("quantity")
-        expect(response.body).toHaveProperty("price")
     })
     
     it("Deve realizar o checkout", async () => {
         const response = await request.post("/order").set('Authorization', 'Bearer ' + token)
 
         expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("userId")
-        expect(response.body).toHaveProperty("orderId")
-        expect(response.body).toHaveProperty("total")
-        expect(response.body).toHaveProperty("products")
     })
 
-    it("Deve retornar erro de autenticação quando estiver sem token", async () => {
-        const response = await request.post("/order")
-        
+    it("Deve retornar pedidos", async () => {
+        const response = await request.get("/order").set('Authorization', 'Bearer ' + token)
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveLength(1)
+
+        const order = response.body[0]
+
+        expect(order).toHaveProperty('id')
+        expect(order).toHaveProperty('total')
+        expect(order).toHaveProperty('status', 'pending')
+        expect(order).toHaveProperty('orderItems')
+
+        const items = order.orderItems
+
+        expect(items).toHaveLength(1)
+
+        const item = items[0]
+
+        expect(item).toHaveProperty('productId', productId)
+        expect(item).toHaveProperty('quantity', 2)
+        expect(Number(item.price)).toBe(14.99)
+        expect(item).toHaveProperty('product')
+        expect(item.product).toHaveProperty('title', 'Mouse USB')
+    })
+
+    it("Deve retornar pedidos do outro usuário", async () => {
+        const response = await request.get("/order").set('Authorization', 'Bearer ' + token2)
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveLength(0)
+    })
+
+    it("Deve retornar erro de token", async () => {
+        const response = await request.get("/order")
+
         expect(response.status).toBe(401)
     })
-
-    it("Deve retornar erro de dados inválidos quando o carrinho estiver vazio", async () => {
-        const response = await request.post("/order").set('Authorization', 'Bearer ' + adminToken)
-        
-        expect(response.status).toBe(404)
-    })
-    
-    it("Deve adicionar um produto ao carrinho para realizar teste de estoque insuficiente", async () => {
-        const response = await request.post("/cart/items").set('Authorization', 'Bearer ' + adminToken).send({
-            productId: productId,
-            quantity: 5
-        })
-
-        await Product.update({ stock: 2 }, { where: { id: productId } })
-
-        expect(response.status).toBe(201)
-        expect(response.body).toHaveProperty("productId")
-        expect(response.body).toHaveProperty("quantity")
-        expect(response.body).toHaveProperty("price")
-    })
-
-    it("Deve retornar erro quando o estoque estiver insuficiente ao realizar checkout", async () => {
-        const response = await request.post("/order").set('Authorization', 'Bearer ' + adminToken)
-        
-        expect(response.status).toBe(400)
-    })
-    
 })

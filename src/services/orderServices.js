@@ -103,6 +103,21 @@ const checkout = async (userId) => {
     }
 }
 
+const getOrderByUser = async (userId) => {
+    const orders = await Order.findAll({ 
+        where: { userId },
+        include: {
+            model: OrderItem,
+            include: [{
+                model: Product
+            }]
+        }
+    })
+
+    return orders
+}
+
 module.exports = {
-    checkout
+    checkout,
+    getOrderByUser
 }
