@@ -75,7 +75,11 @@ const createProduct = async (data) => {
 
 const updateProduct = async (id, data) => {
   const product = await findProductOrFail(id)
-  
+
+  if (data.categoryId !== undefined) {
+    await getCategoryById(data.categoryId)
+  }
+
   return product.update(data)
 }
 
