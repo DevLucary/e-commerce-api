@@ -5,48 +5,48 @@ const User = require("./src/models/User")
 const { sequelize } = require("./src/config/db")
 
 async function seed() {
-    await sequelize.sync()
+  await sequelize.sync()
 
-    const admin = await User.findOne({
-        where: { role: "admin" }
-    })
+  const adminEmail = process.env.ADMIN_EMAIL
+  const adminPassword = process.env.ADMIN_PASSWORD
 
-    if (admin) {
-        console.log("Admin already exists")
-        return
-    }
+  if (!adminEmail || !adminPassword) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required")
+  }
 
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPassword = process.env.ADMIN_PASSWORD
+  const admin = await User.findOne({
+    where: { email: adminEmail }
+  })
 
-    if (!adminEmail || !adminPassword) {
-        throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required")
-    }
+  if (admin) {
+    console.log("Admin already exists")
+    return
+  }
 
-    const hashedPassword = await bcrypt.hash(adminPassword, 10)
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
-    await User.create({
-        name: "Admin",
-        email: adminEmail,
-        password: hashedPassword,
-        role: "admin"
-    })
+  await User.create({
+    name: "Admin",
+    email: adminEmail,
+    password: hashedPassword,
+    role: "admin"
+  })
 
-    console.log("Admin created successfully")
+  console.log("Admin created successfully")
 }
 
 seed()
-    .then(async () => {
-        console.log("Seed complete")
+  .then(async () => {
+    console.log("Seed complete")
 
-        await sequelize.close()
+    await sequelize.close()
 
-        process.exit(0)
-    })
-    .catch(async (error) => {
-        console.error(error)
+    process.exit(0)
+  })
+  .catch(async (error) => {
+    console.error(error)
 
-        await sequelize.close()
+    await sequelize.close()
 
-        process.exit(1)
-    })
+    process.exit(1)
+  })
