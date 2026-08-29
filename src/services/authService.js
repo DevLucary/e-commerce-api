@@ -1,9 +1,17 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
-const User = require("../models/User")
 const crypto = require("crypto")
+
+const User = require("../models/User")
 const { RefreshToken } = require("../models/associations")
 const { sequelize } = require("../config/db")
+
+const hashRefreshToken = (token) => {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex")
+}
 
 const throwInvalidCredentials = () => {
   const error = new Error("Invalid credentials")
@@ -15,41 +23,50 @@ const findUserOrFail = async (email) => {
   const user = await User.findOne({
     where: { email }
   })
-  
-  if(!user) {
+
+  if (!user) {
     throwInvalidCredentials()
   }
-  
+
   return user
 }
 
 const login = async (data) => {
   const { email, password } = data
-  
+
   const user = await findUserOrFail(email)
-  
-  const isPasswordValid = await bcrypt.compare(password, user.password)
-  
-  if(!isPasswordValid) {
+
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    user.password
+  )
+
+  if (!isPasswordValid) {
     throwInvalidCredentials()
   }
-  
-  const token = jwt.sign({ id: user.id },
-  process.env.JWT_SECRET,
-  { expiresIn: "15m" })
 
-  const refreshToken = crypto.randomBytes(40).toString('hex')
+  const token = jwt.sign(
+    { id: user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  )
 
-  const expiresDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  const refreshToken = crypto
+    .randomBytes(40)
+    .toString("hex")
+
+  const expiresDate = new Date(
+    Date.now() + 7 * 24 * 60 * 60 * 1000
+  )
 
   await RefreshToken.create({
-    token: refreshToken,
+    token: hashRefreshToken(refreshToken),
     userId: user.id,
     expiresAt: expiresDate
   })
-  
-  const { password:_, ...rest } = user.toJSON()
-  
+
+  const { password: _, ...rest } = user.toJSON()
+
   return {
     token,
     user: rest,
@@ -61,8 +78,10 @@ const refresh = async (refreshToken) => {
   const transaction = await sequelize.transaction()
 
   try {
+    const hashedToken = hashRefreshToken(refreshToken)
+
     const token = await RefreshToken.findOne({
-      where: { token: refreshToken },
+      where: { token: hashedToken },
       transaction,
       lock: transaction.LOCK.UPDATE
     })
@@ -101,7 +120,9 @@ const refresh = async (refreshToken) => {
       { expiresIn: "15m" }
     )
 
-    const newRefreshToken = crypto.randomBytes(40).toString("hex")
+    const newRefreshToken = crypto
+      .randomBytes(40)
+      .toString("hex")
 
     const expiresDate = new Date(
       Date.now() + 7 * 24 * 60 * 60 * 1000
@@ -109,7 +130,7 @@ const refresh = async (refreshToken) => {
 
     await RefreshToken.create(
       {
-        token: newRefreshToken,
+        token: hashRefreshToken(newRefreshToken),
         userId: user.id,
         expiresAt: expiresDate
       },
