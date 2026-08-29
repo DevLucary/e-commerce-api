@@ -16,8 +16,9 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "${PORT}:${PORT}"
     environment:
+    PORT: ${PORT}
     DB_HOST: db
     DB_USER: ${DB_USER}
     DB_PASS: ${DB_PASS}
