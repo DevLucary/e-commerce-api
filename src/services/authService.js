@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 const User = require("../models/User")
 const crypto = require("crypto")
 const { RefreshToken } = require("../models/associations")
+const { sequelize } = require("../config/db")
 
 const throwInvalidCredentials = () => {
   const error = new Error("Invalid credentials")
@@ -57,49 +58,76 @@ const login = async (data) => {
 }
 
 const refresh = async (refreshToken) => {
-  const token = await RefreshToken.findOne({ where: { token : refreshToken} })
+  const transaction = await sequelize.transaction()
 
-  if (!token) {
-    const error = new Error("Invalid refresh token")
-    error.status = 401
+  try {
+    const token = await RefreshToken.findOne({
+      where: { token: refreshToken },
+      transaction,
+      lock: transaction.LOCK.UPDATE
+    })
+
+    if (!token) {
+      const error = new Error("Invalid refresh token")
+      error.status = 401
+      throw error
+    }
+
+    const user = await User.findByPk(token.userId, {
+      transaction
+    })
+
+    if (!user) {
+      const error = new Error("User not found")
+      error.status = 401
+      throw error
+    }
+
+    if (new Date(token.expiresAt) < new Date()) {
+      await token.destroy({ transaction })
+
+      await transaction.commit()
+
+      const error = new Error("Refresh token expired")
+      error.status = 401
+      throw error
+    }
+
+    await token.destroy({ transaction })
+
+    const newAccessToken = jwt.sign(
+      { id: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    )
+
+    const newRefreshToken = crypto.randomBytes(40).toString("hex")
+
+    const expiresDate = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    )
+
+    await RefreshToken.create(
+      {
+        token: newRefreshToken,
+        userId: user.id,
+        expiresAt: expiresDate
+      },
+      { transaction }
+    )
+
+    await transaction.commit()
+
+    return {
+      token: newAccessToken,
+      refreshToken: newRefreshToken
+    }
+  } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback()
+    }
+
     throw error
-  }
-
-  const user = await User.findByPk(token.userId)
-
-    if(!user) {
-    const error = new Error("User not found")
-    error.status = 401
-    throw error
-  }
-
-  if (new Date(token.expiresAt) < new Date()) {
-    await token.destroy()
-
-    const error = new Error("Refresh token expired")
-    error.status = 401
-    throw error
-  }
-
-  await token.destroy()
-
-  const newAccessToken = jwt.sign({ id: user.id },
-  process.env.JWT_SECRET,
-  { expiresIn: "15m" })
-
-  const newRefreshToken = crypto.randomBytes(40).toString('hex')
-
-  const expiresDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-  await RefreshToken.create({
-    token: newRefreshToken,
-    userId: user.id,
-    expiresAt: expiresDate
-  })
-  
-  return {
-    token: newAccessToken,
-    refreshToken: newRefreshToken
   }
 }
 
