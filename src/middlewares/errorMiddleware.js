@@ -7,19 +7,23 @@ const errorMiddleware = (err, req, res, next) => {
       field: error.path.join("."),
       message: error.message
     }))
-      return res.status(400).json({
+
+    return res.status(400).json({
       error: "Validation failed",
       details: formattedError
     })
   }
-  
+
   const status = err.status || 500
-  const message = err.message
-  
-  logger.error({err}, 'Erro no servidor:')
-  
-  
-  res.status(status).json({
+
+  const message =
+    status === 500
+      ? "Internal server error"
+      : err.message
+
+  logger.error({ err }, "Erro no servidor:")
+
+  return res.status(status).json({
     error: true,
     status,
     message,
