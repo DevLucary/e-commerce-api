@@ -16,7 +16,12 @@ const createProductSchema = z.object({
     .optional()
 })
 
-const updateProductSchema = createProductSchema.partial()
+const updateProductSchema = createProductSchema
+  .partial()
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    { message: "at least one field must be provided" }
+  )
 
 module.exports = {
   createProductSchema,
