@@ -73,13 +73,10 @@ describe("Users", () => {
         expect(response.body).toHaveProperty("token")
     })
 
-    it("Deve listar todos os usuários", async () => {
+    it("Deve impedir usuário comum de listar todos os usuários", async () => {
         const response = await request.get("/users").set("Authorization", `Bearer ${token}`)
 
-        expect(response.status).toBe(200)
-        expect(response.body[0]).toHaveProperty("id")
-        expect(response.body[0]).toHaveProperty("name", "teste")
-        expect(response.body[0]).toHaveProperty("email", "teste@email.com")
+        expect(response.status).toBe(403)
     })
 
     it("Deve retornar erro de autenticação quando não fornecer token", async () => {
