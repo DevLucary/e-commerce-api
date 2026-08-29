@@ -79,10 +79,12 @@ const checkout = async (userId) => {
 
         await OrderItem.bulkCreate(orderItemsData, options)
 
-
         await CartItem.destroy({ where: {cartId: cart.id}, ...options })
 
-        const itemsWithProduct = await order.getOrderItems({include: { model: Product }})
+        const itemsWithProduct = await order.getOrderItems({
+            include: { model: Product },
+            transaction: options.transaction
+        })
 
         if (options.transaction) {
             await transaction.commit()
