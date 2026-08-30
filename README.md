@@ -1,177 +1,285 @@
 # E-COMMERCE API
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white) ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?logo=sequelize&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Jest](https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=white) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Deploy](https://img.shields.io/badge/Deploy-Online-0B0D0E?logo=railway&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white) ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?logo=sequelize&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Jest](https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=white) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Deploy](https://img.shields.io/badge/Deploy-Online-0B0D0E?logo=render&logoColor=white)
 
-This API simulates an e-commerce system. It includes JWT authentication, a checkout with overselling protection using transactions and locks, structured logs with Pino, 91 automated tests with Jest and Supertest, and Swagger documentation available on the Railway deploy.
+REST API that simulates an e-commerce backend with authentication, role-based authorization, products, categories, cart, order history and transactional checkout. The project includes overselling protection with database transactions and row locks, refresh token rotation, structured logging, automated tests and Swagger documentation.
 
-## Features 
+## Features
 
-**Authentication & Security**
-- JWT login and route protection
-- Rate limiting and security headers (Helmet)
+### Authentication & Security
+- JWT access tokens
+- Refresh token rotation
+- Refresh tokens stored as SHA-256 hashes
+- Customer/admin roles and protected routes
+- Password hashing with bcryptjs
+- Rate limiting
+- Security headers with Helmet
+- CORS
 
-**Products & Categories**
-- Full CRUD with image upload
-- Pagination, sorting by price/date, and filtering by category/price range
+### Products & Categories
+- Category CRUD
+- Product CRUD
+- Product image upload
+- Product pagination
+- Sorting by price/date
+- Filtering by category and price range
+- Stock validation
 
-**Cart & Checkout**
-- Add, update, and remove items
-- Transactional checkout with database locks to prevent overselling
+### Cart & Orders
+- Add, update and remove cart items
+- Cart total calculation
+- Transactional checkout
+- Database locks to prevent overselling
+- Product stock revalidation during checkout
+- Order history
 
-**Quality & DevOps**
-- 91 automated tests (Jest + Supertest)
+### Quality & DevOps
+- 105 automated tests with Jest and Supertest
 - Structured logs with Pino
-- Docker support
+- Docker and Docker Compose support
 - Swagger documentation
+- MySQL support with configurable port and TLS/SSL
+- Production deployment on Render with Aiven MySQL
 
 ## Technologies
 
-**Backend**
+### Backend
 - Node.js
 - Express
 
-**Database**
-- MySQL2
+### Database
+- MySQL
+- mysql2
 - Sequelize
 
-**Authentication & Security**
-- Jsonwebtoken
+### Authentication & Security
+- jsonwebtoken
 - bcryptjs
 - Helmet
 - CORS
 - express-rate-limit
 
-**Validation & Logging**
+### Validation & Logging
 - Zod
 - Pino
 
-**Testing**
+### Testing
 - Jest
 - Supertest
+- SQLite in-memory database for automated tests
 
-**DevOps & Documentation**
+### DevOps & Documentation
 - Docker
+- Docker Compose
 - Swagger
+- Render
+- Aiven MySQL
 
-## Endpoints 
+## Endpoints
 
-- `GET /users` - get all registered users | token required
-- `POST /users` - register a new account | public
-- `POST /auth/login` - authenticate and return token | public
+### Users
+- `GET /users` - list registered users | admin required
+- `POST /users` - register a customer account | public
+
+### Authentication
+- `POST /auth/login` - authenticate and return access/refresh tokens | public
+- `POST /auth/refresh` - rotate the refresh token and return new tokens | public
+
+### Admin
+- `POST /admin` - create a new admin account | admin required
 
 ### Categories
-- `GET /categories` - get all categories | public
+- `GET /categories` - list categories | public
 - `GET /categories/:id` - get category by id | public
-- `POST /categories` - create new category | token required
-- `PUT /categories/:id` - update existing category | token required
-- `DELETE /categories/:id` - delete existing category | token required
+- `POST /categories` - create category | admin required
+- `PUT /categories/:id` - update category | admin required
+- `DELETE /categories/:id` - delete category | admin required
 
 ### Products
-- `GET /products` - get all products | public
+- `GET /products` - list products | public
 - `GET /products/:id` - get product by id | public
-- `POST /products` - create new product | token required
-- `PUT /products/:id` - update existing product | token required
-- `DELETE /products/:id` - delete existing product | token required
-- `PATCH /products/:id/upload` - update image of product | token required
+- `POST /products` - create product | admin required
+- `PUT /products/:id` - update product | admin required
+- `DELETE /products/:id` - delete product | admin required
+- `PATCH /products/:id/upload` - upload/update product image | admin required
 
-### Cart / Cart Items
-- `GET /cart/items` - get all cart items | token required
-- `GET /cart/items/calculate` - sum of the prices of all products | token required
-- `POST /cart/items` - create new cart item | token required
-- `PUT /cart/items/:productId` - update the product quantity | token required
+### Cart
+- `GET /cart/items` - get authenticated user's cart items | token required
+- `GET /cart/items/calculate` - calculate cart total | token required
+- `POST /cart/items` - add item to cart | token required
+- `PUT /cart/items/:productId` - update item quantity | token required
 - `DELETE /cart/items/:productId` - remove item from cart | token required
 
-### Order / Order Items
-- `POST /order` - create order of products | token required
+### Orders
+- `POST /order` - checkout | token required
+- `GET /order` - get authenticated user's order history | token required
 
-## Usage 
+## Usage
 
-Create user
-```bash
-Request
+### Create user
+
+Request:
+
+```http
 POST /users
-Body:
+Content-Type: application/json
+```
+
+```json
 {
-  "name": "Lucary",
-  "email": "lucary@email.com",
+  "name": "Example User",
+  "email": "user@example.com",
   "password": "123456"
 }
 ```
-```bash
-Response
 
+Example response:
+
+```json
 {
+  "role": "customer",
   "id": 1,
-  "name": "Lucary",
-  "email": "lucary@email.com",
-  "updatedAt": "2026-04-22T23:44:24.955Z",
-  "createdAt": "2026-04-22T23:44:24.955Z"
+  "name": "Example User",
+  "email": "user@example.com",
+  "updatedAt": "...",
+  "createdAt": "..."
 }
 ```
 
-User Login
-```bash
-Request
+### Login
+
+Request:
+
+```http
 POST /auth/login
-Body: 
+Content-Type: application/json
+```
+
+```json
 {
-  "email": "lucary@email.com",
+  "email": "user@example.com",
   "password": "123456"
 }
 ```
-```bash
-Response
+
+Example response:
+
+```json
 {
-  "token": "string (JWT)",
-  "user": 
-  {
+  "token": "JWT_ACCESS_TOKEN",
+  "user": {
     "id": 1,
-    "name": "Lucary",
-    "email": "lucary@email.com",
-    "createdAt": "...",
-    "updatedAt": "..."
-  }
+    "name": "Example User",
+    "email": "user@example.com",
+    "role": "customer"
+  },
+  "refreshToken": "REFRESH_TOKEN"
 }
 ```
 
-## Running the application
+### Refresh access token
 
-- Copy `.env.example` to `.env` and fill in the required environment variables.
+Request:
+
+```http
+POST /auth/refresh
+Content-Type: application/json
+```
+
+```json
+{
+  "refreshToken": "REFRESH_TOKEN"
+}
+```
+
+The endpoint invalidates the previous refresh token and returns a new access token and refresh token.
+
+## Environment variables
+
+Copy `.env.example` to `.env` and configure the environment before running the application.
+
+```env
+PORT=8089
+
+DB_NAME=DATABASE_NAME
+DB_USER=MYSQL_USER
+DB_PASS=MYSQL_PASSWORD
+DB_HOST=localhost
+DB_PORT=3306
+DB_SSL=false
+DB_CA_PATH=./certs/ca.pem
+
+JWT_SECRET=CHANGE_THIS_SECRET
+
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=CHANGE_THIS_PASSWORD
+```
+
+`DB_ROOT_PASS` is also used by the local Docker Compose MySQL service. Do not commit real credentials or secrets.
+
+For remote MySQL providers that require TLS, configure `DB_SSL=true`, the provider port in `DB_PORT`, and a trusted CA certificate through `DB_CA_PATH`.
+
+## Running locally
 
 ```bash
 git clone https://github.com/DevLucary/e-commerce-api
+cd e-commerce-api
 npm install
-node src/index.js
+npm start
 ```
 
-## Roadmap
+## Run with Docker
 
-- [ ] User roles (admin/customer)
-- [ ] Refresh token rotation
-- [ ] CI/CD pipeline
-- [ ] Order history endpoint
-
-## Deploy
-
-The API is documented with Swagger. After starting the server, access:
-
-- Local: http://localhost:8089/api-docs
-- Production: https://e-commerce-api-production-1902.up.railway.app/api-docs
-
-## Run with docker 
+Configure `.env`, then run:
 
 ```bash
 docker compose up --build
 ```
 
+## Admin seed
+
+Configure `ADMIN_EMAIL` and `ADMIN_PASSWORD`, then run:
+
+```bash
+node seed.js
+```
+
+The seed creates the configured admin account when it does not already exist.
+
 ## Testing
 
 The project includes integration tests using Jest and Supertest with an in-memory SQLite database.
 
-Run all test with:
+Run all tests with:
+
 ```bash
 npm test
 ```
+
+Current suite: **105 automated tests**.
+
+> The automated suite uses SQLite, so MySQL-specific transaction and locking behavior should also be validated against MySQL when changing checkout concurrency logic.
+
+## Deploy
+
+Production API:
+
+- https://e-commerce-api-ukuj.onrender.com
+
+Swagger documentation:
+
+- Local: http://localhost:8089/api-docs
+- Production: https://e-commerce-api-ukuj.onrender.com/api-docs
+
+The production API runs on Render and connects to Aiven MySQL over TLS.
+
+## Roadmap
+
+- [x] User roles (admin/customer)
+- [x] Refresh token rotation
+- [x] Order history endpoint
+- [ ] CI/CD pipeline
+- [ ] Database migrations
 
 ## Author
 
